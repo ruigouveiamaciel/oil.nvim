@@ -172,14 +172,13 @@ describe("parser", function()
 
   it("errors on duplicate names for nested files", function()
     local file = test_adapter.test_set("/foo/a.txt", "file")
-    local _ = test_adapter.test_set("/foo/bar", "directory")
-    local file2 = test_adapter.test_set("/foo/bar/a.txt", "file")
+    local dir = test_adapter.test_set("/foo/bar", "directory")
+    local _ = test_adapter.test_set("/foo/bar/a.txt", "file")
     vim.cmd.edit({ args = { "oil-test:///foo/" } })
     local bufnr = vim.api.nvim_get_current_buf()
     set_lines(bufnr, {
-      "bar/",
-      string.format("/%d a.txt", file[FIELD_ID]),
-      string.format("/%d a.txt", file2[FIELD_ID]),
+      string.format("/%d bar", dir[FIELD_ID]),
+      string.format("/%d bar/a.txt", file[FIELD_ID]),
     })
     local _, errors = parser.parse(bufnr)
     assert.are.same({
