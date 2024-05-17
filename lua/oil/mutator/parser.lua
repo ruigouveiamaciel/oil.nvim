@@ -37,7 +37,7 @@ local FIELD_META = constants.FIELD_META
 ---@return string
 ---@return boolean
 local function parsedir(name)
-  local isdir = vim.endswith(name, "/")
+  local isdir = vim.endswith(name, "/") or (fs.is_windows and vim.endswith(name, "\\"))
   if isdir then
     name = name:sub(1, name:len() - 1)
   end
@@ -218,13 +218,15 @@ M.parse = function(bufnr)
           message = "Could not find existing entry (was the ID changed?)"
         end
         table.insert(errors, {
-          message = message,
+          message = err_message,
           lnum = i - 1,
           end_lnum = i,
           col = 0,
         })
         goto continue
       end
+      assert(entry)
+
       check_dupe(parsed_entry.name, i)
       local meta = entry[FIELD_META]
       if original_entries[parsed_entry.name] == parsed_entry.id then
